@@ -64,6 +64,6 @@ maxNonlinearIts = 10
 maxLineSearches = 0
 conservativeFlux = {0:'pwl-bdm-opt'}
 
-if ctx.gauges:
-    auxiliaryVariables=[lineGauges]
+#if ctx.gauges:
+#    auxiliaryVariables=[lineGauges]
 #auxiliaryVariables=[pointGauges,rzWaveGenerator]

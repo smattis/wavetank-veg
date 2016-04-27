@@ -8,6 +8,8 @@ from proteus.ctransportCoefficients import smoothedHeaviside_integral
 from proteus import Gauges
 from proteus.Gauges import PointGauges,LineGauges,LineIntegralGauges
 from proteus import WaveTools as WT
+import vegZoneVelocityInterp as vegZoneInterp
+
 
 from proteus import Context
 opts=Context.Options([
@@ -24,7 +26,7 @@ opts=Context.Options([
 #wave generator
 windVelocity = (0.0,0.0, 0.0)
 veg_platform_height = 17.2/44.0 + 6.1/20.0
-depth = veg_platform_height + opts.depth
+depth = opts.depth #veg_platform_height + opts.depth
 inflowHeightMean = depth
 inflowVelocityMean = (0.0,0.0,0.0)
 period = opts.peak_period
@@ -153,18 +155,18 @@ elif spaceOrder == 2:
 # Domain and mesh
 
 #for debugging, make the tank short
-L = (45.4,opts.tank_height)
-he = 0.04 #0.025 #float(wavelength)/130.0 #100.0 #50.0#0.0#100
-L = (L[0], L[1], 0.25)
+#L = (45.4,opts.tank_height)
+he = 0.25 #0.025 #float(wavelength)/130.0 #100.0 #50.0#0.0#100
+L = (12.2, opts.tank_height, he)
 GenerationZoneLength = wavelength
-AbsorptionZoneLength= 45.4-37.9
+AbsorptionZoneLength= 45.4-37.9-28.7
 spongeLayer = True
 xSponge = GenerationZoneLength
 xRelaxCenter = xSponge/2.0
 epsFact_solid = xSponge/2.0
 #zone 2
-xSponge_2 = 37.9
-xRelaxCenter_2 = 0.5*(37.9+45.4)
+xSponge_2 = 37.9-28.7
+xRelaxCenter_2 = 0.5*(37.9+45.4-28.7)
 epsFact_solid_2 = AbsorptionZoneLength/2.0
 
 weak_bc_penalty_constant = 100.0
@@ -177,22 +179,22 @@ structured=False
 
 gauge_dx=0.075
 PGL=[]
-gauge_top = 19.5/44.0 + 1.5
-veg_gauge_bottom_y = 17.2/44.0 + 6.1/20.0
-LGL=[[(6.1, (6.1 - 5.4)/44.0, 0.5*L[2]), (6.1,gauge_top,0.5*L[2])],#1 Goda
-     [(6.4, (6.4 - 5.4)/44.0, 0.5*L[2]), (6.4,gauge_top,0.5*L[2])],#2 Goda
-     [(7.0, (7.0 - 5.4)/44.0, 0.5*L[2]), (7.0,gauge_top,0.5*L[2])],#3 Goda
-     [(26.0, veg_gauge_bottom_y, 0.5*L[2]), (26.0,gauge_top,0.5*L[2])],#4 veg
-     [(26.9, veg_gauge_bottom_y, 0.5*L[2]), (26.9,gauge_top,0.5*L[2])],#5
-     [(27.4, veg_gauge_bottom_y, 0.5*L[2]), (27.4,gauge_top,0.5*L[2])],#6
-     [(27.9, veg_gauge_bottom_y, 0.5*L[2]), (27.9,gauge_top,0.5*L[2])],#7
-     [(28.5, veg_gauge_bottom_y, 0.5*L[2]), (28.5,gauge_top,0.5*L[2])],#8
-     [(29.5, veg_gauge_bottom_y, 0.5*L[2]), (29.5,gauge_top,0.5*L[2])],#9
-     [(31.0, veg_gauge_bottom_y, 0.5*L[2]), (31.0,gauge_top,0.5*L[2])],#10
-     [(32.7, veg_gauge_bottom_y, 0.5*L[2]), (32.7,gauge_top,0.5*L[2])],#11
-     [(34.4, veg_gauge_bottom_y, 0.5*L[2]), (34.4,gauge_top,0.5*L[2])],#12
-     [(36.2, veg_gauge_bottom_y, 0.5*L[2]), (36.2,gauge_top,0.5*L[2])]]#13
-#for i in range(0,int(L[0]/gauge_dx+1)): #+1 only if gauge_dx is an exact
+gauge_top = L[1] #19.5/44.0 + 1.5
+veg_gauge_bottom_y = 0.0 #17.2/44.0 + 6.1/20.0
+LGL=[#[(6.1, (6.1 - 5.4)/44.0, 0.5*L[2]), (6.1,gauge_top,0.5*L[2])],#1 Goda
+     #[#(6.4, (6.4 - 5.4)/44.0, 0.5*L[2]), (6.4,gauge_top,0.5*L[2])],#2 Goda
+     #[#(7.0, (7.0 - 5.4)/44.0, 0.5*L[2]), (7.0,gauge_top,0.5*L[2])],#3 Goda
+     #[#(26.0, veg_gauge_bottom_y, 0.5*L[2]), (26.0,gauge_top,0.5*L[2])],#4 veg
+     [(0.9, veg_gauge_bottom_y, 0.5*L[2]), (0.9,gauge_top,0.5*L[2])],#5
+     [(1.4, veg_gauge_bottom_y, 0.5*L[2]), (1.4,gauge_top,0.5*L[2])],#6
+     [(1.9, veg_gauge_bottom_y, 0.5*L[2]), (1.9,gauge_top,0.5*L[2])],#7
+     [(2.5, veg_gauge_bottom_y, 0.5*L[2]), (2.5,gauge_top,0.5*L[2])],#8
+     [(3.5, veg_gauge_bottom_y, 0.5*L[2]), (3.5,gauge_top,0.5*L[2])],#9
+     [(5.0, veg_gauge_bottom_y, 0.5*L[2]), (5.0,gauge_top,0.5*L[2])],#10
+     [(6.7, veg_gauge_bottom_y, 0.5*L[2]), (6.7,gauge_top,0.5*L[2])],#11
+     [(8.4, veg_gauge_bottom_y, 0.5*L[2]), (8.4,gauge_top,0.5*L[2])],#12
+     [(10.2, veg_gauge_bottom_y, 0.5*L[2]), (10.2,gauge_top,0.5*L[2])]]#13
+# for i in range(0,int(L[0]/gauge_dx+1)): #+1 only if gauge_dx is an exact
 #  PGL.append([gauge_dx*i,0.5,0])
 #  LGL.append([(gauge_dx*i,0.0,0),(gauge_dx*i,L[1],0)])
 
@@ -213,17 +215,17 @@ columnLines=tuple(map(tuple,LGL))
 fields = ('vof',)
 
 columnGauge = LineIntegralGauges(gauges=((fields, columnLines),),
-                                 fileName='column_gauge.csv')
+                                 fileName='column_gauge3D.csv')
 
 #v_resolution = max(he,0.05)
 #linePoints = int((gauge_top - veg_gauge_bottom_y)/v_resolution)
-lineGauges  = LineGauges(gauges=((('u','v'),#fields in gauge set
-                                  (#lines for these fields
-                                      ((26.0, veg_gauge_bottom_y, 0.5*L[2]),(26.0, gauge_top, 0.5*L[2])),
-                                  ),#end  lines
-                              ),#end gauge set
-                             ),#end gauges
-                         fileName="vegZoneVelocity.csv")
+# lineGauges  = LineGauges(gauges=((('u','v'),#fields in gauge set
+#                                   (#lines for these fields
+#                                       ((26.0, veg_gauge_bottom_y, 0.5*L[2]),(26.0, gauge_top, 0.5*L[2])),
+#                                   ),#end  lines
+#                               ),#end gauge set
+#                              ),#end gauges
+#                          fileName="vegZoneVelocity.csv")
 
 #lineGauges_phi  = LineGauges_phi(lineGauges.endpoints,linePoints=20)
 
@@ -420,9 +422,9 @@ else:
         
 
         bp = 20.0*(opts.tank_height-0.2)
-        vertices=[[0.0,                                                   0.0 ,0.0                ],#0 begin wave paddle bottom
-                  [5.4,                                                   0.0     ,0.0            ],#1 end wave paddle bottom, begin incline 1
-                  [5.4 + 17.2,                                            17.2/44.0   ,0.0        ],#2 end incline 1, begin incline 2
+        vertices=[##[0.0,                                                   0.0 ,0.0                ],#0 begin wave paddle bottom
+                  #[5.4,                                                   0.0     ,0.0            ],#1 end wave paddle bottom, begin incline 1
+                  #[5.4 + 17.2,                                            17.2/44.0   ,0.0        ],#2 end incline 1, begin incline 2
                   [5.4 + 17.2 + 6.1,                                      17.2/44.0 + 6.1/20.0 ,0.0 ],#3 end incline 2, begin pre veg platform
                   [5.4 + 17.2 + 6.1 + 1.2,                                17.2/44.0 + 6.1/20.0 ,0.0 ],#4 end pre veg platform, begin veg zone
                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8,                          17.2/44.0 + 6.1/20.0 ,0.0 ],#5 end veg zone, begin post veg platform
@@ -430,11 +432,16 @@ else:
                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2 + bp,            17.2/44.0 + 6.1/20.0 + bp/20.0 ,0.0],#7 end slope bottom
                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2 + bp,            17.2/44.0 + 6.1/20.0 + bp/20.0+0.2 ,0.0],#8 end slope top
                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2,                    19.5/44.0 + 1.5 ,0.0],#9 -- sponge begin sponge top
-                  [0.0,                                                   19.5/44.0 + 1.5 ,0.0]]#10 begin wave paddle top
+                  [28.7,                                                   19.5/44.0 + 1.5 ,0.0]]#10 begin wave paddle top
+        vertices = np.array(vertices)
+        vertices[:,0] -= 28.7
+        vertices[:,1] -= 17.2/44.0 + 6.1/20.0
+        vertices = vertices.tolist()
+        
 
-        vertexFlags=[boundaryTags['bottom'],#0
-                     boundaryTags['bottom'],#1
-                     boundaryTags['bottom'],#2
+        vertexFlags=[#boundaryTags['bottom'],#0
+                     #boundaryTags['bottom'],#1
+                     #boundaryTags['bottom'],#2
                      boundaryTags['bottom'],#3
                      boundaryTags['bottom'],#4
                      boundaryTags['bottom'],#5
@@ -448,6 +455,8 @@ else:
             vertices.append([v[0],v[1], L[2]])
             #vertexFlags.append(boundaryTags['back'])
         vertexFlags += vertexFlags
+        vertices[0][0] = 0.0
+        vertices[8][0] = 0.0
         segments=[[0,1],#0 bottom
                   [1,2],#1 bottom
                   [2,3],#2 bottom
@@ -460,10 +469,21 @@ else:
                   [9,10],#9 top
                   [10,0],#10 left
                   [6,9]]#11 interior
+        segments=[[0,1], #0 bottom
+                  [1,2], #1 bottom
+                  [2,3], #2 bottom
+                  [3,4], #3 bottom
+                  [4,5], #4 right
+                  [5,6], #5 top
+                  [6,7], #6 top
+                  [7,0], #7 left,
+                  [3,6]] #8 interior
+                  
+                  
 
-        segmentFlags=[boundaryTags['bottom'],#0
-                      boundaryTags['bottom'],#1
-                      boundaryTags['bottom'],#2
+        segmentFlags=[# boundaryTags['bottom'],#0
+                      # boundaryTags['bottom'],#1
+                      # boundaryTags['bottom'],#2
                       boundaryTags['bottom'],#3
                       boundaryTags['bottom'],#4
                       boundaryTags['bottom'],#5
@@ -478,16 +498,17 @@ else:
         facetFlags=[]
 
         for s,sF in zip(segments,segmentFlags):
-            facets.append([[s[0],s[1],s[1]+11,s[0]+11]])
+            facets.append([[s[0],s[1],s[1]+8,s[0]+8]])
             facetFlags.append(sF)
 
         #bf=[[0,1,6,7],[1,2,5,6],[2,3,4,5]] #
-        bf=[[0,1,2,3,4,5,6,9,10], [6,7,8,9]]
+        #bf=[[0,1,2,3,4,5,6,9,10], [6,7,8,9]]
+        bf=[[0,1,2,3,6,7], [3,4,5,6]]
         tf=[]
         for i in range(0,2):
          facets.append([bf[i]])
          facetFlags.append(boundaryTags['front'])
-         tf=[ss + 11 for ss in bf[i]]
+         tf=[ss + 8 for ss in bf[i]]
          facets.append([tf])
          facetFlags.append(boundaryTags['back'])
 
@@ -743,13 +764,24 @@ def ramp(t):
 def waveHeight(x,t):
     # import pdb
     # pdb.set_trace()
-    return inflowHeightMean + ramp(t)*waves.eta(x,t)
+    return  float(vegZoneInterp.interp_phi.__call__(t%vegZoneInterp.time[-1])) 
+    # return inflowHeightMean + ramp(t)*waves.eta(x,t)
+# def waveVelocity_u(x,t):
+#     return waves.u(x,t)[0]*ramp(t)
+# def waveVelocity_v(x,t):
+#     return waves.u(x,t)[1]*ramp(t)
+# def waveVelocity_w(x,t):
+#     return waves.u(x,t)[2]*ramp(t)
+
+def waveHeight(x,t):
+    return  float(vegZoneInterp.interp_phi.__call__(t%vegZoneInterp.time[-1])) 
 def waveVelocity_u(x,t):
-    return waves.u(x,t)[0]*ramp(t)
-def waveVelocity_v(x,t):
-    return waves.u(x,t)[1]*ramp(t)
+    return vegZoneInterp.interpU.__call__(t%vegZoneInterp.time[-1],x[1])[0][0] 
 def waveVelocity_w(x,t):
-    return waves.u(x,t)[2]*ramp(t)
+    return 0.0
+def waveVelocity_v(x,t):
+    return vegZoneInterp.interpW.__call__(t%vegZoneInterp.time[-1],x[1])[0][0]
+
 # import pdb
 # pdb.set_trace()
 #solution variables
@@ -851,3 +883,55 @@ rzWaveGenerator = RelaxationZoneWaveGenerator(zones={
                                                                      zeroVel,
                                                                      zeroVel,
                                                                      zeroVel)})
+
+#beam info
+beam_quadOrder=3
+beam_useSparse=False
+beamFilename="wavetankBeams"
+beamLocation=[]
+beamLength=[]
+beamRadius=[]
+EI=[]
+GJ=[]
+lam = 10.0 #0.07 #0.05 #3.0*2.54/100.0 #57.4e-3
+lamx = 3.0**0.5*lam
+xs = 10.2
+ys = 0.0
+xList=[]
+yList = []
+while xs <= 11.0:
+    xList.append(xs)
+    xs += lam
+while ys<= L[1]:
+    yList.append(ys)
+    ys+=lamx
+for i in xList:
+    for j in yList:
+        beamLocation.append((i,j))
+        beamLength.append(0.415)
+        beamRadius.append(0.00) #32)
+        EI.append(0.0142) # needs to be fixed
+        GJ.append(0.5*0.0142) # needs to be fixed
+
+xs = 100.2+0.5*lam
+ys = 0.5*lamx
+xList=[]
+yList = []
+while xs <= 11.0:
+    xList.append(xs)
+    xs += lam
+
+while ys<= L[1]:
+    yList.append(ys)
+    ys+=lamx
+
+for i in xList:
+    for j in yList:
+        beamLocation.append((i,j))
+        beamLength.append(0.415)
+        beamRadius.append(0.00) #32)
+        EI.append(0.0142) # needs to be fixed
+        GJ.append(0.5*0.0142) # needs to be fixed
+nBeamElements = int(beamLength[0]/he*0.5)
+nBeamElements=max(nBeamElements,3)
+print nBeamElements
