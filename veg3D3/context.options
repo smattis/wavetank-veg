@@ -1,1 +1,1 @@
-depth=0.533 parallel=True tank_height=1.05
+depth=0.533 parallel=True tank_height=1.05 use_veg=False

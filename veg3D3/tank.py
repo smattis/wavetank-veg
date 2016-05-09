@@ -21,7 +21,8 @@ opts=Context.Options([
     ("peak_wavelength",3.91,"Peak wavelength in [m]"),
     ("parallel", False, "Run in parallel"),
     ("gauges", True, "Enable gauges"),
-    ("tank_height", 1.0, "height of wave tank")])
+    ("tank_height", 1.0, "height of wave tank"),
+    ("use_veg", False, "include vegetation")])
 
 #wave generator
 windVelocity = (0.0,0.0, 0.0)
@@ -112,7 +113,7 @@ useRBLES   = 0.0
 useMetrics = 1.0
 applyCorrection=True
 useVF = 1.0
-useOnlyVF = True #False #True #False #True #False
+useOnlyVF = False #True #False #True #False #True #False
 useRANS = 0 # 0 -- None
             # 1 -- K-Epsilon
             # 2 -- K-Omega
@@ -156,8 +157,8 @@ elif spaceOrder == 2:
 
 #for debugging, make the tank short
 #L = (45.4,opts.tank_height)
-he = 0.055 #0.025 #float(wavelength)/130.0 #100.0 #50.0#0.0#100
-L = (12.2, opts.tank_height, 0.4 ) #0.5)
+he = 0.025 #0.025 #float(wavelength)/130.0 #100.0 #50.0#0.0#100
+L = (12.2, opts.tank_height, he ) #0.5)
 GenerationZoneLength = wavelength
 AbsorptionZoneLength= 45.4-37.9-28.7
 spongeLayer = True
@@ -194,169 +195,18 @@ LGL=[#[(6.1, (6.1 - 5.4)/44.0, 0.5*L[2]), (6.1,gauge_top,0.5*L[2])],#1 Goda
      [(7.0, veg_gauge_bottom_y, 0.5*L[2]), (7.0,gauge_top,0.5*L[2])],#11
      [(8.7, veg_gauge_bottom_y, 0.5*L[2]), (8.7,gauge_top,0.5*L[2])],#12
      [(10.5, veg_gauge_bottom_y, 0.5*L[2]), (10.5,gauge_top,0.5*L[2])]]#13
-# for i in range(0,int(L[0]/gauge_dx+1)): #+1 only if gauge_dx is an exact
-#  PGL.append([gauge_dx*i,0.5,0])
-#  LGL.append([(gauge_dx*i,0.0,0),(gauge_dx*i,L[1],0)])
+
 
 
 gaugeLocations=tuple(map(tuple,PGL))
 columnLines=tuple(map(tuple,LGL))
 
 
-#pointGauges = PointGauges(gauges=((('u','v'), gaugeLocations),
-#                                (('p',),    gaugeLocations)),
-#                  activeTime = (0, 1000.0),
-#                  sampleRate = 0,
-#                  fileName = 'combined_gauge_0_0.5_sample_all.txt')
-
-#print gaugeLocations
-#print columnLines
 
 fields = ('vof',)
 
 columnGauge = LineIntegralGauges(gauges=((fields, columnLines),),
                                  fileName='column_gauge3D.csv')
-
-#v_resolution = max(he,0.05)
-#linePoints = int((gauge_top - veg_gauge_bottom_y)/v_resolution)
-# lineGauges  = LineGauges(gauges=((('u','v'),#fields in gauge set
-#                                   (#lines for these fields
-#                                       ((26.0, veg_gauge_bottom_y, 0.5*L[2]),(26.0, gauge_top, 0.5*L[2])),
-#                                   ),#end  lines
-#                               ),#end gauge set
-#                              ),#end gauges
-#                          fileName="vegZoneVelocity.csv")
-
-#lineGauges_phi  = LineGauges_phi(lineGauges.endpoints,linePoints=20)
-
-
-# if useHex:
-#     nnx=ceil(L[0]/he)+1
-#     nny=ceil(L[1]/he)+1
-#     hex=True
-#     domain = Domain.RectangularDomain(L)
-# else:
-#     boundaries=['left','right','bottom','top','front','back']
-#     boundaryTags=dict([(key,i+1) for (i,key) in enumerate(boundaries)])
-#     if structured:
-#         nnx=ceil(L[0]/he)+1
-#         nny=ceil(L[1]/he)+1
-#     elif spongeLayer:
-#         #tp = opts.tank_height
-#         bp = 20.0*(opts.tank_height-0.2)
-#         vertices=[[0.0,                                                   0.0                 ],#0 begin wave paddle bottom
-#                   [5.4,                                                   0.0                 ],#1 end wave paddle bottom, begin incline 1
-#                   [5.4 + 17.2,                                            17.2/44.0           ],#2 end incline 1, begin incline 2
-#                   [5.4 + 17.2 + 6.1,                                      17.2/44.0 + 6.1/20.0  ],#3 end incline 2, begin pre veg platform
-#                   [5.4 + 17.2 + 6.1 + 1.2,                                17.2/44.0 + 6.1/20.0  ],#4 end pre veg platform, begin veg zone
-#                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8,                          17.2/44.0 + 6.1/20.0  ],#5 end veg zone, begin post veg platform
-#                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2,                    17.2/44.0 + 6.1/20.0  ],#6 -- sponge, end post veg platorm, begin slope bottom
-#                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2 + bp,            17.2/44.0 + 6.1/20.0 + bp/20.0],#7 end slope bottom
-#                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2 + bp,            17.2/44.0 + 6.1/20.0 + bp/20.0+0.2],#8 end slope top
-#                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2,                    19.5/44.0 + 1.5],#9 -- sponge begin sponge top
-#                   [0.0,                                                   19.5/44.0 + 1.5]]#10 begin wave paddle top
-
-#         vertexFlags=[boundaryTags['bottom'],#0
-#                      boundaryTags['bottom'],#1
-#                      boundaryTags['bottom'],#2
-#                      boundaryTags['bottom'],#3
-#                      boundaryTags['bottom'],#4
-#                      boundaryTags['bottom'],#5
-#                      boundaryTags['bottom'],#6
-#                      boundaryTags['bottom'],#7
-#                      boundaryTags['top'],#8
-#                      boundaryTags['top'],#9
-#                      boundaryTags['top']]#10
-#         segments=[[0,1],#0
-#                   [1,2],#1
-#                   [2,3],#2
-#                   [3,4],#3
-#                   [4,5],#4
-#                   [5,6],#5
-#                   [6,7],#6
-#                   [7,8],#7
-#                   [8,9],#8
-#                   [9,10],#8
-#                   [10,0],#9
-#                   [6,9]]#10
-
-#         segmentFlags=[boundaryTags['bottom'],#0
-#                       boundaryTags['bottom'],#1
-#                       boundaryTags['bottom'],#2
-#                       boundaryTags['bottom'],#3
-#                       boundaryTags['bottom'],#4
-#                       boundaryTags['bottom'],#5
-#                       boundaryTags['bottom'],#6
-#                       boundaryTags['right'],#7
-#                       boundaryTags['top'],#8
-#                       boundaryTags['top'],#9
-#                       boundaryTags['left'],#10
-#                       0]#11
-
-#         regions=[[0.5,0.5],
-#                   [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2+1.0,                    17.2/44.0 + 6.1/20.0 + 1.0]]
-#         regionFlags=[1,2]
-#         domain = Domain.PlanarStraightLineGraphDomain(vertices=vertices,
-#                                                       vertexFlags=vertexFlags,
-#                                                       segments=segments,
-#                                                       segmentFlags=segmentFlags,
-#                                                       regions=regions,
-#                                                       regionFlags=regionFlags)
-#         #go ahead and add a boundary tags member
-#         domain.boundaryTags = boundaryTags
-#         domain.writePoly("mesh")
-#         domain.writePLY("mesh")
-#         domain.writeAsymptote("mesh")
-#         triangleOptions="VApq30Dena%8.8f" % ((he**2)/2.0,)
-#         print triangleOptions
-#         logEvent("""Mesh generated using: triangle -%s %s"""  % (triangleOptions,domain.polyfile+".poly"))
-#         porosityTypes      = numpy.array([1.0,
-#                                           1.0,
-#                                           1.0])
-#         dragAlphaTypes = numpy.array([0.0,
-#                                       0.0,
-#                                       0.5/1.004e-6])
-#         dragBetaTypes = numpy.array([0.0,0.0,0.0])
-
-#         epsFact_solidTypes = np.array([0.0,0.0,epsFact_solid_2])
-
-#     else:
-#         vertices=[[0.0,0.0],#0
-#                   [L[0],0.0],#1
-#                   [L[0],L[1]],#2
-#                   [0.0,L[1]]]#3
-
-#         vertexFlags=[boundaryTags['bottom'],
-#                      boundaryTags['bottom'],
-#                      boundaryTags['top'],
-#                      boundaryTags['top']]
-#         segments=[[0,1],
-#                   [1,2],
-#                   [2,3],
-#                   [3,0]
-#                   ]
-#         segmentFlags=[boundaryTags['bottom'],
-#                       boundaryTags['right'],
-#                       boundaryTags['top'],
-#                       boundaryTags['left']]
-
-#         regions=[ [ 0.1*L[0] , 0.1*L[1] ],
-#                   [0.95*L[0] , 0.95*L[1] ] ]
-#         regionFlags=[1,2]
-#         domain = Domain.PlanarStraightLineGraphDomain(vertices=vertices,
-#                                                       vertexFlags=vertexFlags,
-#                                                       segments=segments,
-#                                                       segmentFlags=segmentFlags,
-#                                                       regions=regions,
-#                                                       regionFlags=regionFlags)
-#         #go ahead and add a boundary tags member
-#         domain.boundaryTags = boundaryTags
-#         domain.writePoly("mesh")
-#         domain.writePLY("mesh")
-#         domain.writeAsymptote("mesh")
-#         triangleOptions="VApq30Dena%8.8f" % ((he**2)/2.0,)
-
-#         logEvent("""Mesh generated using: triangle -%s %s"""  % (triangleOptions,domain.polyfile+".poly"))
 
 if useHex:   
     nnx=4*Refinement+1
@@ -371,68 +221,21 @@ else:
         nny=2*Refinement
         domain = Domain.RectangularDomain(L)
     elif spongeLayer:
-        # vertices=[[0.0,0.0,0.0],#0
-        #           [xSponge,0.0,0.0],#1
-        #           [xSponge_2,0.0,0.0],#2 
-        #           [L[0],0.0,L[2]-0.2],#3
-        #           [L[0], 0.0, L[2]],#4
-        #           [xSponge_2, 0.0, L[2]],#5
-        #           [xSponge,0.0,L[2]],#6
-        #           [0.0,0.0,L[2]]]#7
-        
-               
-        # vertexFlags=[boundaryTags['front'],
-        #              boundaryTags['front'],
-        #              boundaryTags['front'],
-        #              boundaryTags['front'],
-        #              boundaryTags['front'],
-        #              boundaryTags['front'],            
-        #              boundaryTags['front'],       
-        #              boundaryTags['front']]
 
-
-        # for v,vf in zip(vertices,vertexFlags):
-        #     vertices.append([v[0],L[1], v[2]])
-        #     vertexFlags.append(boundaryTags['back'])
-
-        # print vertices
-        # print vertexFlags
-
-        # segments=[[0,1],
-        #           [1,2],
-        #           [2,3],
-        #           [3,4],
-        #           [4,5],
-        #           [5,6],
-        #           [6,7],
-        #           [7,0],
-        #           [1,6],
-        #           [2,5]]
-                 
-        # segmentFlags=[boundaryTags['bottom'],
-        #              boundaryTags['bottom'],
-        #              boundaryTags['bottom'],                   
-        #              boundaryTags['right'],
-        #              boundaryTags['top'],
-        #              boundaryTags['top'],
-        #              boundaryTags['top'],
-        #              boundaryTags['left'],
-        #              boundaryTags['empty'],
-        #              boundaryTags['empty'] ]
         
 
         bp = 20.0*(opts.tank_height-0.2)
         vertices=[##[0.0,                                                   0.0 ,0.0                ],#0 begin wave paddle bottom
-                  #[5.4,                                                   0.0     ,0.0            ],#1 end wave paddle bottom, begin incline 1
-                  #[5.4 + 17.2,                                            17.2/44.0   ,0.0        ],#2 end incline 1, begin incline 2
-                  [5.4 + 17.2 + 6.1,                                      17.2/44.0 + 6.1/20.0 ,0.0 ],#3 end incline 2, begin pre veg platform
-                  [5.4 + 17.2 + 6.1 + 1.2,                                17.2/44.0 + 6.1/20.0 ,0.0 ],#4 end pre veg platform, begin veg zone
-                  [5.4 + 17.2 + 6.1 + 1.2 + 9.8,                          17.2/44.0 + 6.1/20.0 ,0.0 ],#5 end veg zone, begin post veg platform
-                  [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2,                    17.2/44.0 + 6.1/20.0 ,0.0 ],#6 -- sponge, end post veg platorm, begin slope bottom
-                  [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2 + bp,            17.2/44.0 + 6.1/20.0 + bp/20.0 ,0.0],#7 end slope bottom
-                  [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2 + bp,            17.2/44.0 + 6.1/20.0 + bp/20.0+0.2 ,0.0],#8 end slope top
-                  [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2,                    19.5/44.0 + 1.5 ,0.0],#9 -- sponge begin sponge top
-                  [28.7,                                                   19.5/44.0 + 1.5 ,0.0]]#10 begin wave paddle top
+            #[5.4,                                                   0.0     ,0.0            ],#1 end wave paddle bottom, begin incline 1
+            #[5.4 + 17.2,                                            17.2/44.0   ,0.0        ],#2 end incline 1, begin incline 2
+            [5.4 + 17.2 + 6.1,                                      17.2/44.0 + 6.1/20.0 ,0.0 ],#3 end incline 2, begin pre veg platform
+            [5.4 + 17.2 + 6.1 + 1.2,                                17.2/44.0 + 6.1/20.0 ,0.0 ],#4 end pre veg platform, begin veg zone
+            [5.4 + 17.2 + 6.1 + 1.2 + 9.8,                          17.2/44.0 + 6.1/20.0 ,0.0 ],#5 end veg zone, begin post veg platform
+            [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2,                    17.2/44.0 + 6.1/20.0 ,0.0 ],#6 -- sponge, end post veg platorm, begin slope bottom
+            [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2 + bp,            17.2/44.0 + 6.1/20.0 + bp/20.0 ,0.0],#7 end slope bottom
+            [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2 + bp,            19.5/44.0 + 1.5 ,0.0], #17.2/44.0 + 6.1/20.0 + bp/20.0+0.2 ,0.0],#8 end slope top
+            [5.4 + 17.2 + 6.1 + 1.2 + 9.8 + 1.2,                    19.5/44.0 + 1.5 ,0.0],#9 -- sponge begin sponge top
+            [28.7,                                                   19.5/44.0 + 1.5 ,0.0]]#10 begin wave paddle top
         vertices = np.array(vertices)
         vertices[:,0] -= 28.7
         vertices[:,1] -= 17.2/44.0 + 6.1/20.0
@@ -501,10 +304,8 @@ else:
             facets.append([[s[0],s[1],s[1]+8,s[0]+8]])
             facetFlags.append(sF)
 
-        #bf=[[0,1,6,7],[1,2,5,6],[2,3,4,5]] #
-        #bf=[[0,1,2,3,4,5,6,9,10], [6,7,8,9]]
+
         bf=[[0,1,2,3,6,7], [3,4,5,6]]
-        #bf=[[0,1,6,7], [1,2
         tf=[]
         for i in range(0,2):
          facets.append([bf[i]])
@@ -514,26 +315,14 @@ else:
          facetFlags.append(boundaryTags['back'])
 
 
-        # for i in range(0,2):
-        #  facetFlags.append(boundaryTags['front'])
-        #  facetFlags.append(boundaryTags['back'])
-        # bf=[[6,9,6+11,9+11]]
-        # for i in range(0,1):
-        #  facets.append([bf[i]])
-        #  facetFlags.append(boundaryTags['empty'])
-        
-
         print facets
         print facetFlags
+        
+        
+        regions=[ [ 0.1*L[0] , 0.5*L[1] , 0.5*L[2]],
+                  [vertices[3][0]+1.0e-3 , vertices[3][1]+1.0e-3 , 0.5*L[2]] ]
 
-        regions=[ [ 0.1*L[0] , 0.1*L[1] , 0.5*L[2]],
-                  [0.95*L[0] , 0.95*L[1] , 0.5*L[2]] ]
-        # regions=[[xRelaxCenter, 0.5*L[1],0.5*L[2]],
-        #          [xRelaxCenter_2, 0.5*L[1], 0.5*L[2]],
-        #          [0.5*L[0],0.5*L[1], 0.5*L[2]]]
         regionFlags=[1,2]
-        # import pdb
-        # pdb.set_trace()
         domain = Domain.PiecewiseLinearComplexDomain(vertices=vertices,
                                                      vertexFlags=vertexFlags,
                                                      facets=facets,
