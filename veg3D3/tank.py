@@ -112,8 +112,8 @@ useHex     = False
 useRBLES   = 0.0
 useMetrics = 1.0
 applyCorrection=True
-useVF = 1.0
-useOnlyVF = False #True #False #True #False #True #False
+useVF = 0.0
+useOnlyVF = False #True #False #True #False #True #False #True #False
 useRANS = 0 # 0 -- None
             # 1 -- K-Epsilon
             # 2 -- K-Omega
@@ -157,7 +157,7 @@ elif spaceOrder == 2:
 
 #for debugging, make the tank short
 #L = (45.4,opts.tank_height)
-he = 0.025 #0.025 #float(wavelength)/130.0 #100.0 #50.0#0.0#100
+he = 0.05 #0.025 #float(wavelength)/130.0 #100.0 #50.0#0.0#100
 L = (12.2, opts.tank_height, he ) #0.5)
 GenerationZoneLength = wavelength
 AbsorptionZoneLength= 45.4-37.9-28.7
@@ -260,22 +260,22 @@ else:
         vertexFlags += vertexFlags
         vertices[0][0] = 0.0
         vertices[8][0] = 0.0
-        segments=[[0,1],#0 bottom
-                  [1,2],#1 bottom
-                  [2,3],#2 bottom
-                  [3,4],#3 bottom
-                  [4,5],#4 bottom
-                  [5,6],#5 bottom
-                  [6,7],#6 botton
-                  [7,8],#7 right
-                  [8,9],#8 top 
-                  [9,10],#9 top
-                  [10,0],#10 left
-                  [6,9]]#11 interior
+        #segments=[[0,1],#0 bottom
+        #          [1,2],#1 bottom
+        #          [2,3],#2 bottom
+        #          [3,4],#3 bottom
+        #          [4,5],#4 bottom
+        #          [5,6],#5 bottom
+        #          [6,7],#6 botton
+        #          [7,8],#7 right
+        #          [8,9],#8 top 
+        #          [9,10],#9 top
+        #          [10,0],#10 left
+        #          [6,9]]#11 interior
         segments=[[0,1], #0 bottom
                   [1,2], #1 bottom
                   [2,3], #2 bottom
-                  [3,4], #3 bottom
+                  [3,4], #3 right bottom
                   [4,5], #4 right
                   [5,6], #5 top
                   [6,7], #6 top
@@ -516,21 +516,28 @@ sigma_01 = 0.0
 g = [0.0,-9.8]
 
 # Initial condition
-waterLine_x = 4*L[0]
+x1=vertices[3][0]
+y1=vertices[3][1]
+x2=vertices[4][0]
+y2=vertices[4][1]
 waterLine_z = inflowHeightMean
+waterLine_x = ((x2-x1)*waterLine_z-x2*y1+x1*y2)/(y2-y1)
+#waterLine_z = inflowHeightMean
 
 
 def signedDistance(x):
     phi_x = x[0]-waterLine_x
     phi_z = x[1]-waterLine_z
-    if phi_x < 0.0:
-        if phi_z < 0.0:
-            return max(phi_x,phi_z)
-        else:
-            return phi_z
+    #if phi_x < 0.0:
+    #    if phi_z < 0.0:
+    #        return max(phi_x,phi_z)
+    #    else:
+    #        return phi_z
+    if x[0] <= waterLine_x: # vertices[3][0]: #phi_x < 0.0:
+        return phi_z
     else:
         if phi_z < 0.0:
-            return phi_x
+            return phi_z
         else:
             return sqrt(phi_x**2 + phi_z**2)
 
