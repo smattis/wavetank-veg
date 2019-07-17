@@ -2,7 +2,7 @@ from proteus import *
 from proteus.default_p import *
 from tank import *
 from proteus.mprans import RANS2P
-from proteus.mprans import RANS2P_VEG
+from proteus.mprans import RANS2P_IB as RANS2P_VEG
 
 LevelModelType = RANS2P_VEG.LevelModel
 if useOnlyVF:
@@ -56,8 +56,8 @@ if spongeLayer or levee or slopingSpongeLayer:
                                            beamFilename=beamFilename,
                                            beam_Cd=1.2,
                                            beam_nlTol=1.0e-5,
-                                           beamRigid=False,
-                                           yVertical = True)
+                                           beamRigid=False)#,
+    #yVertical = True)
 else:
     coefficients = RANS2P.Coefficients(epsFact=epsFact_viscosity,
                                        sigma=0.0,
