@@ -27,7 +27,7 @@ opts=Context.Options([
     ("input_filepath", '.', "filepath for input csv files")])
 
 #wave generator
-(interp_time, interp_phi, interpU, interpW) = vegZoneInterp(opts.input_filepath)
+(interp_time, interp_phi, interpU, interpW) = vegZoneInterp.getSplines(opts.input_filepath)
 
 windVelocity = (0.0,0.0, 0.0)
 veg_platform_height = 17.2/44.0 + 6.1/20.0
@@ -123,15 +123,15 @@ useRANS = 0 # 0 -- None
             # 2 -- K-Omega
 # Input checks
 if spaceOrder not in [1,2]:
-    print "INVALID: spaceOrder" + spaceOrder
+    print("INVALID: spaceOrder" + spaceOrder)
     sys.exit()
 
 if useRBLES not in [0.0, 1.0]:
-    print "INVALID: useRBLES" + useRBLES
+    print("INVALID: useRBLES" + useRBLES)
     sys.exit()
 
 if useMetrics not in [0.0, 1.0]:
-    print "INVALID: useMetrics"
+    print("INVALID: useMetrics")
     sys.exit()
 
 #  Discretization
@@ -139,21 +139,21 @@ nd = 3
 if spaceOrder == 1:
     hFactor=1.0
     if useHex:
-	 basis=C0_AffineLinearOnCubeWithNodalBasis
-         elementQuadrature = CubeGaussQuadrature(nd,2)
-         elementBoundaryQuadrature = CubeGaussQuadrature(nd-1,2)
+        basis=C0_AffineLinearOnCubeWithNodalBasis
+        elementQuadrature = CubeGaussQuadrature(nd,2)
+        elementBoundaryQuadrature = CubeGaussQuadrature(nd-1,2)
     else:
-    	 basis=C0_AffineLinearOnSimplexWithNodalBasis
-         elementQuadrature = SimplexGaussQuadrature(nd,3)
-         elementBoundaryQuadrature = SimplexGaussQuadrature(nd-1,3)
+        basis=C0_AffineLinearOnSimplexWithNodalBasis
+        elementQuadrature = SimplexGaussQuadrature(nd,3)
+        elementBoundaryQuadrature = SimplexGaussQuadrature(nd-1,3)
 elif spaceOrder == 2:
     hFactor=0.5
     if useHex:
-	basis=C0_AffineLagrangeOnCubeWithNodalBasis
+        basis=C0_AffineLagrangeOnCubeWithNodalBasis
         elementQuadrature = CubeGaussQuadrature(nd,4)
         elementBoundaryQuadrature = CubeGaussQuadrature(nd-1,4)
     else:
-	basis=C0_AffineQuadraticOnSimplexWithNodalBasis
+        basis=C0_AffineQuadraticOnSimplexWithNodalBasis
         elementQuadrature = SimplexGaussQuadrature(nd,4)
         elementBoundaryQuadrature = SimplexGaussQuadrature(nd-1,4)
 
@@ -212,10 +212,10 @@ fields = ('vof',)
 columnGauge = LineIntegralGauges(gauges=((fields, columnLines),),
                                  fileName='column_gauge3D.csv')
 
-if useHex:   
+if useHex:
     nnx=4*Refinement+1
     nny=2*Refinement+1
-    hex=True    
+    hex=True
     domain = Domain.RectangularDomain(L)
 else:
     boundaries=['empty','left','right','bottom','top','front','back']
@@ -226,7 +226,7 @@ else:
         domain = Domain.RectangularDomain(L)
     elif spongeLayer:
 
-        
+
 
         bp = 20.0*(opts.tank_height-0.2)
         vertices=[##[0.0,                                                   0.0 ,0.0                ],#0 begin wave paddle bottom
@@ -244,7 +244,7 @@ else:
         vertices[:,0] -= 28.7
         vertices[:,1] -= 17.2/44.0 + 6.1/20.0
         vertices = vertices.tolist()
-        
+
 
         vertexFlags=[#boundaryTags['bottom'],#0
                      #boundaryTags['bottom'],#1
@@ -272,7 +272,7 @@ else:
         #          [5,6],#5 bottom
         #          [6,7],#6 botton
         #          [7,8],#7 right
-        #          [8,9],#8 top 
+        #          [8,9],#8 top
         #          [9,10],#9 top
         #          [10,0],#10 left
         #          [6,9]]#11 interior
@@ -285,8 +285,8 @@ else:
                   [6,7], #6 top
                   [7,0], #7 left,
                   [3,6]] #8 interior
-                  
-                  
+
+
 
         segmentFlags=[# boundaryTags['bottom'],#0
                       # boundaryTags['bottom'],#1
@@ -319,10 +319,10 @@ else:
          facetFlags.append(boundaryTags['back'])
 
 
-        print facets
-        print facetFlags
-        
-        
+        print(facets)
+        print(facetFlags)
+
+
         regions=[ [ 0.1*L[0] , 0.5*L[1] , 0.5*L[2]],
                   [vertices[3][0]+1.0e-3 , vertices[3][1]+1.0e-3 , 0.5*L[2]] ]
 
@@ -334,7 +334,7 @@ else:
                                                      regions=regions,
                                                      regionFlags=regionFlags,
                                                      )
-        #go ahead and add a boundary tags member 
+        #go ahead and add a boundary tags member
         domain.boundaryTags = boundaryTags
         domain.writePoly("mesh")
         domain.writePLY("mesh")
@@ -354,16 +354,16 @@ else:
                                       0.5/1.004e-6])
 
         dragBetaTypes = numpy.array([0.0,0.0,0.0]) #,0.0])
-        
+
         epsFact_solidTypes = np.array([0.0,0.0,0.0]) #,0.0])
 
-    else:             
+    else:
         vertices=[[0.0,0.0,0.0],#0
                   [L[0],0.0,0.0],#1
-                  [L[0],L[1],0.0],#2       
+                  [L[0],L[1],0.0],#2
                   [0.0,L[1],0.0]]#3
-        
-               
+
+
         vertexFlags=[boundaryTags['bottom'],
                      boundaryTags['bottom'],
                      boundaryTags['bottom'],
@@ -378,8 +378,8 @@ else:
                   [1,2],
                   [2,3],
                   [3,0]]
-                 
-        segmentFlags=[boundaryTags['front'],                   
+
+        segmentFlags=[boundaryTags['front'],
                      boundaryTags['right'],
                      boundaryTags['back'],
                      boundaryTags['left']]
@@ -405,7 +405,7 @@ else:
         for s,sF in zip(segments,segmentFlags):
             segments.append([s[1]+4,s[0]+4])
             segmentFlags.append(sF)
-        
+
 
         regions=[[0.5*L[0],0.5*L[1], 0.0]]
         regionFlags=[1]
@@ -416,7 +416,7 @@ else:
                                                      facetFlags=facetFlags,
                                                      regions=regions,
                                                      regionFlags=regionFlags)
-        #go ahead and add a boundary tags member 
+        #go ahead and add a boundary tags member
         domain.boundaryTags = boundaryTags
         domain.writePoly("mesh")
         domain.writePLY("mesh")
@@ -736,4 +736,4 @@ if opts.veg_density == 400:
             GJ.append(2.0*0.0142) # needs to be fixed
 nBeamElements = int(beamLength[0]/he*0.5)
 nBeamElements=max(nBeamElements,3)
-print nBeamElements
+print(nBeamElements)

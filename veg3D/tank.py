@@ -118,15 +118,15 @@ useRANS = 0 # 0 -- None
             # 2 -- K-Omega
 # Input checks
 if spaceOrder not in [1,2]:
-    print "INVALID: spaceOrder" + spaceOrder
+    #print "INVALID: spaceOrder" + spaceOrder
     sys.exit()
 
 if useRBLES not in [0.0, 1.0]:
-    print "INVALID: useRBLES" + useRBLES
+    #print "INVALID: useRBLES" + useRBLES
     sys.exit()
 
 if useMetrics not in [0.0, 1.0]:
-    print "INVALID: useMetrics"
+    #print "INVALID: useMetrics"
     sys.exit()
 
 #  Discretization
@@ -134,21 +134,21 @@ nd = 3
 if spaceOrder == 1:
     hFactor=1.0
     if useHex:
-	 basis=C0_AffineLinearOnCubeWithNodalBasis
-         elementQuadrature = CubeGaussQuadrature(nd,2)
-         elementBoundaryQuadrature = CubeGaussQuadrature(nd-1,2)
+        basis=C0_AffineLinearOnCubeWithNodalBasis
+        elementQuadrature = CubeGaussQuadrature(nd,2)
+        elementBoundaryQuadrature = CubeGaussQuadrature(nd-1,2)
     else:
-    	 basis=C0_AffineLinearOnSimplexWithNodalBasis
-         elementQuadrature = SimplexGaussQuadrature(nd,3)
-         elementBoundaryQuadrature = SimplexGaussQuadrature(nd-1,3)
+        basis=C0_AffineLinearOnSimplexWithNodalBasis
+        elementQuadrature = SimplexGaussQuadrature(nd,3)
+        elementBoundaryQuadrature = SimplexGaussQuadrature(nd-1,3)
 elif spaceOrder == 2:
     hFactor=0.5
     if useHex:
-	basis=C0_AffineLagrangeOnCubeWithNodalBasis
+        basis=C0_AffineLagrangeOnCubeWithNodalBasis
         elementQuadrature = CubeGaussQuadrature(nd,4)
         elementBoundaryQuadrature = CubeGaussQuadrature(nd-1,4)
     else:
-	basis=C0_AffineQuadraticOnSimplexWithNodalBasis
+        basis=C0_AffineQuadraticOnSimplexWithNodalBasis
         elementQuadrature = SimplexGaussQuadrature(nd,4)
         elementBoundaryQuadrature = SimplexGaussQuadrature(nd-1,4)
 
@@ -157,6 +157,7 @@ elif spaceOrder == 2:
 #for debugging, make the tank short
 #L = (45.4,opts.tank_height)
 he = 0.25 #0.025 #float(wavelength)/130.0 #100.0 #50.0#0.0#100
+he *= 10.0#degbugging
 L = (12.2, opts.tank_height, he)
 GenerationZoneLength = wavelength
 AbsorptionZoneLength= 45.4-37.9-28.7
@@ -522,8 +523,8 @@ else:
         #  facetFlags.append(boundaryTags['empty'])
         
 
-        print facets
-        print facetFlags
+        print(facets)
+        print(facetFlags)
 
         regions=[ [ 0.1*L[0] , 0.1*L[1] , 0.5*L[2]],
                   [0.95*L[0] , 0.95*L[1] , 0.5*L[2]] ]
@@ -934,4 +935,4 @@ for i in xList:
         GJ.append(0.5*0.0142) # needs to be fixed
 nBeamElements = int(beamLength[0]/he*0.5)
 nBeamElements=max(nBeamElements,3)
-print nBeamElements
+print(nBeamElements)
